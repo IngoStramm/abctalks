@@ -1,0 +1,26 @@
+{
+  "name": "abctalks",
+  "version": "1.0.0",
+  "description": "Plugin Model to start a plugin for WordPress",
+  "main": "Gruntfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ingo Stramm",
+  "license": "ISC",
+  "devDependencies": {
+    "grunt": "^1.5.3",
+    "grunt-contrib-imagemin": "^4.0.0",
+    "grunt-contrib-jshint": "^3.2.0",
+    "grunt-contrib-uglify": "^5.0.1",
+    "grunt-contrib-watch": "^1.1.0",
+    "grunt-sass": "^3.1.0",
+    "grunt-text-replace": "^0.4.0",
+    "grunt-watcher": "^1.0.0",
+    "grunt-zip": "^0.18.2",
+    "load-grunt-tasks": "^5.1.0",
+    "minimist": "^1.2.5",
+    "node-sass": "^7.0.1",
+    "readable-stream": "^3.6.0"
+  }
+}
