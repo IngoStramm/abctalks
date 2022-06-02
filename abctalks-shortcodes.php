@@ -3,9 +3,11 @@
 /**
  * abctalks_get_youtube_playlist_videos
  *
- * @param  mixed $playlist_id
- * @param  mixed $max_results
- * @return void
+ * Retorna a quantidade de vídeo especificada da playlist definida
+ * 
+ * @param  string $playlist_id
+ * @param  int $max_results
+ * @return array or string (error message)
  */
 function abctalks_get_youtube_playlist_videos($playlist_id, $max_results = 4)
 {
@@ -28,7 +30,8 @@ function abctalks_get_youtube_playlist_videos($playlist_id, $max_results = 4)
                     $playlist_videos[] = array(
                         'title' => $playlist_item->snippet->title,
                         'video_id' => $playlist_item->snippet->resourceId->videoId,
-                        'thumbnail' => $playlist_item->snippet->thumbnails->high->url
+                        'thumbnail' => $playlist_item->snippet->thumbnails->high->url,
+                        'video_description' => $playlist_item->snippet->description
                     );
                     $count_videos++;
                 }
@@ -42,8 +45,10 @@ function abctalks_get_youtube_playlist_videos($playlist_id, $max_results = 4)
 /**
  * abctalks_playlist_shortcode
  *
- * @param  mixed $atts
- * @return void
+ * Retorna o HTML dos vídeos, conforme os parâmetros passados (playlist ID e quantidade de vídeos)
+ * 
+ * @param  array $atts
+ * @return string
  */
 function abctalks_playlist_shortcode($atts)
 {
@@ -75,6 +80,14 @@ function abctalks_playlist_shortcode($atts)
     return $output;
 }
 
+/**
+ * abctalks_main_playlist_shortcode
+ *
+ * Retorna os útlimos 4 quatro vídeos da playlist principal
+ * 
+ * @param  array $atts
+ * @return string
+ */
 function abctalks_main_playlist_shortcode($atts)
 {
     $playlist_id = abctalks_get_option('main_playlist_id');
@@ -87,6 +100,14 @@ function abctalks_main_playlist_shortcode($atts)
     return abctalks_playlist_shortcode($atts);
 }
 
+/**
+ * abctalks_cuts_playlist_shortcode
+ *
+ * Retorna os útlimos 4 quatro vídeos da playlist de cortes
+ * 
+ * @param  array $atts
+ * @return string
+ */
 function abctalks_cuts_playlist_shortcode($atts)
 {
     $playlist_id = abctalks_get_option('cuts_playlist_id');
@@ -99,6 +120,14 @@ function abctalks_cuts_playlist_shortcode($atts)
     return abctalks_playlist_shortcode($atts);
 }
 
+/**
+ * abctalks_last_video_main_playlist_shortcode
+ *
+ * Retorna o vídeo mais recente da playlist principal
+ * 
+ * @param  array $atts
+ * @return string
+ */
 function abctalks_last_video_main_playlist_shortcode($atts)
 {
     $playlist_id = abctalks_get_option('main_playlist_id');
@@ -113,38 +142,15 @@ function abctalks_last_video_main_playlist_shortcode($atts)
 /**
  * abctalks_get_youtube_playlist_description
  *
- * @param  mixed $atts
- * @return void
+ * Retorna a descrição do vídeo mais recente da playlist principal
+ * 
+ * @return string
  */
-function abctalks_get_youtube_playlist_description($atts)
+function abctalks_get_youtube_playlist_description()
 {
     $playlist_id = abctalks_get_option('main_playlist_id');
-    $atts = shortcode_atts(array(
-        'playlist_id' => $playlist_id ? $playlist_id : '',
-    ), $atts);
-
-    $playlist_id = $atts['playlist_id'];
-
-    $api_key = abctalks_get_option('youtube_api_key');
-
-    if (!$api_key)
-        return __('API Key não encontrada', 'abctalks');
-
-    $playlist_url = 'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=1&playlistId=' . $playlist_id . '&key=' . $api_key;
-
-    $playlist_json = file_get_contents($playlist_url);
-    $playlist_array = json_decode($playlist_json, true);
-
-    $video_id = $playlist_array['items'][0]['snippet']['resourceId']['videoId'];
-    $video_url = 'https://www.googleapis.com/youtube/v3/videos?part=snippet&id=' . $video_id . '&key=' . $api_key;
-
-    $video_json = file_get_contents($video_url);
-    $video_array = json_decode($video_json, true);
-
-    $video_description = $video_array['items'][0]['snippet']['description'];
-
-
-    return $video_description;
+    $last_video = abctalks_get_youtube_playlist_videos($playlist_id, 1);
+    return $last_video[0]['video_description'];
 }
 
 add_shortcode('abctalks_last_video_main_playlist', 'abctalks_last_video_main_playlist_shortcode');
