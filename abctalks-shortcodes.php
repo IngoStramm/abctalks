@@ -15,21 +15,23 @@ function abctalks_get_youtube_playlist_videos($playlist_id, $max_results = 4)
         return __('API Key não encontrada', 'abctalks');
 
     $playlist_videos = array();
-    $next_page_token = '';
-    $url = 'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=' . $max_results . '&playlistId=' . $playlist_id . '&key=' . $api_key;
-    if ($next_page_token != '') {
-        $url .= '&pageToken=' . $next_page_token;
-    }
+    // Removido o parâmetro "max_results" para retornar todos os vídeos da playlist
+    $url = 'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=' . $playlist_id . '&key=' . $api_key;
     $youtube_playlist_response = wp_remote_get($url);
     if (is_array($youtube_playlist_response)) {
         $youtube_playlist_response = json_decode($youtube_playlist_response['body']);
         if (isset($youtube_playlist_response->items)) {
+            $count_videos = 0;
             foreach ($youtube_playlist_response->items as $playlist_item) {
-                $playlist_videos[] = array(
-                    'title' => $playlist_item->snippet->title,
-                    'video_id' => $playlist_item->snippet->resourceId->videoId,
-                    'thumbnail' => $playlist_item->snippet->thumbnails->high->url
-                );
+                // Previne que vídeos privados sejam exibidos
+                if ($playlist_item->snippet->title !== 'Private video' && $count_videos < $max_results) {
+                    $playlist_videos[] = array(
+                        'title' => $playlist_item->snippet->title,
+                        'video_id' => $playlist_item->snippet->resourceId->videoId,
+                        'thumbnail' => $playlist_item->snippet->thumbnails->high->url
+                    );
+                    $count_videos++;
+                }
             }
         }
     }

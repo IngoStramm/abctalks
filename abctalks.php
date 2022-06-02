@@ -4,7 +4,7 @@
  * Plugin Name: ABC Talks
  * Plugin URI: https://agencialaf.com
  * Description: Descrição do ABC Talks.
- * Version: 0.0.1
+ * Version: 0.0.2
  * Author: Ingo Stramm
  * Text Domain: abctalks
  * License: GPLv2
