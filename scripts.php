@@ -18,3 +18,18 @@ function abc_talk_frontend_scripts()
     wp_localize_script('abctalks-script', 'ajax_object', array('ajax_url' => admin_url('admin-ajax.php')));
     wp_enqueue_style('abctalks-style', ABC_TALK_URL . 'assets/css/abctalks.css', array(), false, 'all');
 }
+
+add_action('wp_enqueue_scripts', 'abc_talk_admin_scripts');
+add_action('admin_enqueue_scripts', 'abc_talk_admin_scripts');
+
+function abc_talk_admin_scripts()
+{
+    if (!is_user_logged_in())
+        return;
+
+    $min = (in_array($_SERVER['REMOTE_ADDR'], array('127.0.0.1', '::1', '10.0.0.3'))) ? '' : '.min';
+
+    wp_register_script('abctalks-admin-script', ABC_TALK_URL . 'assets/js/abctalks-admin' . $min . '.js', array('jquery'), '1.0.0', true);
+    wp_enqueue_script('abctalks-admin-script');
+    wp_localize_script('abctalks-admin-script', 'ajax_object', array('ajax_url' => admin_url('admin-ajax.php')));
+}

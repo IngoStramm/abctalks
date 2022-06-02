@@ -10,10 +10,11 @@ function abctalks_settings_metabox()
 
     $cmb_options = new_cmb2_box(array(
         'id'           => 'abctalks_settings_page',
-        'title'        => esc_html__('ABC Talks', 'abctalks'),
+        'title'        => esc_html__('ABC Talk', 'abctalks'),
         'object_types' => array('options-page'),
         'option_key'      => 'abctalks_settings', // The option key and admin menu page slug.
         'icon_url'        => 'dashicons-microphone', // Menu icon. Only applicable if 'parent_slug' is left empty.
+        'capability'        => 'edit_others_pages'
     ));
 
     $cmb_options->add_field(array(
@@ -45,6 +46,13 @@ function abctalks_settings_metabox()
         'id'      => 'title_2',
         'type'    => 'title',
         'after_field'  => 'abctalks_shortcodes_after_field',
+    ));
+
+    $cmb_options->add_field(array(
+        'name'    => esc_html__('Sincronização dos vídeos', 'abctalks'),
+        'id'      => 'title_3',
+        'type'    => 'title',
+        'after_field'  => 'abctalks_video_sync_after_field',
     ));
 }
 
@@ -105,5 +113,14 @@ function abctalks_shortcodes_after_field()
             }
         }
     </script>
+<?php
+}
+
+function abctalks_video_sync_after_field()
+{
+?>
+    <p>Por padrão, os vídeos são sincronizados com o Youtube automaticamente a cada hora.</p>
+    <p>Caso necessário, clique no botão "<strong>Sincronizar vídeos</strong>", na barra no topo, para executar a sincronização neste momento (<em>vide imagem abaixo<em>).</p>
+    <img src="<?php echo ABC_TALK_URL ?>/assets/images/print-video-sync-btn.jpg" />
 <?php
 }

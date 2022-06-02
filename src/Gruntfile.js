@@ -26,7 +26,8 @@ module.exports = function (grunt) {
             },
             all: [
                 'Gruntfile.js',
-                '<%= dirs.js %>/abctalks.js'
+                '<%= dirs.js %>/abctalks.js',
+                '<%= dirs.js %>/abctalks-admin.js',
             ]
         },
 
@@ -35,7 +36,9 @@ module.exports = function (grunt) {
             dist: {
                 files: {
                     '<%= dirs.js %>/abctalks.min.js':
-                        '<%= dirs.js %>/abctalks.js'    // Custom JavaScript
+                        '<%= dirs.js %>/abctalks.js',    // Custom JavaScript
+                    '<%= dirs.js %>/abctalks-admin.min.js':
+                        '<%= dirs.js %>/abctalks-admin.js',    // Custom JavaScript
 
                 }
             }
@@ -117,7 +120,8 @@ module.exports = function (grunt) {
                     '!<%= dirs.sass %>/**',
                     '!../**.zip',
                     '!../info.json',
-                    '<%= dirs.js %>/abctalks.min.js'
+                    '<%= dirs.js %>/abctalks.min.js',
+                    '<%= dirs.js %>/abctalks-admin.min.js'
                 ],
                 dest: '../dist/<%= pkg.name %>.zip'
             }

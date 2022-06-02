@@ -1,6 +1,6 @@
 {
     "name": "ABC Talks",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "download_url": "https://github.com/IngoStramm/abctalks/raw/master/dist/abctalks.zip",
     "homepage": "https://agencialaf.com",
     "requires": "4.7",
