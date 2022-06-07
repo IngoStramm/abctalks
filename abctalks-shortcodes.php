@@ -1,6 +1,32 @@
 <?php
 
 /**
+ * abctalks_last_video_main_playlist_shortcode
+ *
+ * Retorna o vídeo mais recente da playlist principal
+ * 
+ * @param  array $atts
+ * @return string
+ */
+function abctalks_next_live_video_shortcode()
+{
+    return abctalks_next_upcoming_video_output();
+}
+
+/**
+ * abctalks_get_youtube_playlist_description
+ *
+ * Retorna a descrição do vídeo mais recente da playlist principal
+ * 
+ * @return string
+ */
+function abctalks_get_next_live_video_full_description_shortcode()
+{
+    $live_next_video_full_description = get_transient('live_next_video_full_description');
+    return $live_next_video_full_description;
+}
+
+/**
  * abctalks_main_playlist_shortcode
  *
  * Retorna os útlimos 4 quatro vídeos da playlist principal
@@ -40,39 +66,7 @@ function abctalks_cuts_playlist_shortcode($atts)
     return abctalks_playlist_output($atts);
 }
 
-/**
- * abctalks_last_video_main_playlist_shortcode
- *
- * Retorna o vídeo mais recente da playlist principal
- * 
- * @param  array $atts
- * @return string
- */
-function abctalks_last_video_main_playlist_shortcode($atts)
-{
-    $playlist_id = abctalks_get_option('main_playlist_id');
-    $atts = shortcode_atts(array(
-        'playlist_id' => $playlist_id ? $playlist_id : '',
-        'max_results' => 1
-    ), $atts);
-
-    return abctalks_playlist_output($atts);
-}
-
-/**
- * abctalks_get_youtube_playlist_description
- *
- * Retorna a descrição do vídeo mais recente da playlist principal
- * 
- * @return string
- */
-function abctalks_get_youtube_playlist_description_shortcode()
-{
-    $main_playlist_videos = get_transient('main_playlist_videos');
-    return $main_playlist_videos[0]['video_description'];
-}
-
-add_shortcode('abctalks_last_video_main_playlist', 'abctalks_last_video_main_playlist_shortcode');
-add_shortcode('abctalks_playlist_description', 'abctalks_get_youtube_playlist_description_shortcode');
+add_shortcode('abctalks_next_live_video', 'abctalks_next_live_video_shortcode');
+add_shortcode('abctalks_next_live_video_description', 'abctalks_get_next_live_video_full_description_shortcode');
 add_shortcode('abctalks_main_playlist', 'abctalks_main_playlist_shortcode');
 add_shortcode('abctalks_cuts_playlist', 'abctalks_cuts_playlist_shortcode');

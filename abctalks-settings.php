@@ -18,7 +18,7 @@ function abctalks_settings_metabox()
     ));
 
     $cmb_options->add_field(array(
-        'name'    => esc_html__('Preencha as informações abaixo para que os vídeos sejam exibidos no site.', 'abctalks'),
+        'name'    => esc_html__('Configurações do Youtube', 'abctalks'),
         'id'      => 'title_1',
         'type'    => 'title',
     ));
@@ -26,6 +26,12 @@ function abctalks_settings_metabox()
     $cmb_options->add_field(array(
         'name'    => esc_html__('API Key do Youtube', 'abctalks'),
         'id'      => 'youtube_api_key',
+        'type'    => 'text',
+    ));
+
+    $cmb_options->add_field(array(
+        'name'    => esc_html__('ID do canal do Youtube', 'abctalks'),
+        'id'      => 'channel_id',
         'type'    => 'text',
     ));
 
@@ -89,8 +95,8 @@ function abctalks_shortcodes_after_field()
 ?>
     <p>Use as opções de shortcodes abaixo para exibir os vídeos. Clique nos códigos para copiá-los.</p>
     <ul class="abctalks-shortcodes">
-        <li>Exibir o vídeo mais recente da playlist dos episódios inteiros: <code title="Clique para copiar">[abctalks_last_video_main_playlist]</code></li>
-        <li>Exibir a descrição do vídeo mais recente da playlist dos episódios inteiros: <code title="Clique para copiar">[abctalks_playlist_description]</code></li>
+        <li>Exibir o vídeo da próxima live: <code title="Clique para copiar">[abctalks_next_live_video]</code></li>
+        <li>Exibir a descrição do vídeo da próxima live: <code title="Clique para copiar">[abctalks_next_live_video_description]</code></li>
         <li>Exibir os últimos 4 vídeos mais recentes da playlist dos episódios inteiros: <code title="Clique para copiar">[abctalks_main_playlist]</code></li>
         <li>Exibir os últimos 3 vídeos mais recentes da playlist dos cortes: <code title="Clique para copiar">[abctalks_cuts_playlist]</code></li>
     </ul>
