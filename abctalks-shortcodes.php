@@ -23,6 +23,12 @@ function abctalks_next_live_video_shortcode()
 function abctalks_get_next_live_video_full_description_shortcode()
 {
     $live_next_video_full_description = get_transient('live_next_video_full_description');
+    // Verifica se existe nos transientes
+    if (!$live_next_video_full_description) {
+        // abctalk_debug('Transiente \'live_next_video_full_description\' não encontrado');
+        $live_next_video_full_description = abctalks_get_live_next_video_full_description();
+        set_transient('live_next_video_full_description', $live_next_video_full_description, HOUR_IN_SECONDS);
+    }
     return $live_next_video_full_description;
 }
 

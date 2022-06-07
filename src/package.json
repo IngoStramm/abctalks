@@ -1,6 +1,6 @@
 {
   "name": "abctalks",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Plugin Model to start a plugin for WordPress",
   "main": "Gruntfile.js",
   "scripts": {

@@ -2,6 +2,8 @@
 
 /**
  * abctalks_get_live_next_video
+ * 
+ * Retorna o próximo vídeo de live do Youtube
  *
  * @return array (or string: error message)
  */
@@ -32,9 +34,22 @@ function abctalks_get_live_next_video()
     return $youtube_next_video;
 }
 
+/**
+ * abctalks_get_live_next_video_full_description
+ * 
+ * Retorna a descrição completa do próximo vídeo de live do Youyube
+ *
+ * @return string
+ */
 function abctalks_get_live_next_video_full_description()
 {
-    $live_next_video = abctalks_get_live_next_video();
+    $live_next_video = get_transient('live_next_video');
+    // Verifica se existe nos transientes
+    if (!$live_next_video) {
+        // abctalk_debug('Transiente \'live_next_video\' não encontrado');
+        $live_next_video = abctalks_get_live_next_video();
+        set_transient('live_next_video', $live_next_video, HOUR_IN_SECONDS);
+    }
 
     if (!$live_next_video)
         return __('Não foi possível encontrar o vídeo da próxima live nos transientes.', 'abctalks');
@@ -108,38 +123,6 @@ function abctalks_get_playlist_videos($playlist_id)
 }
 
 /**
- * abctalks_set_playlist_videos_transients
- * 
- * verifica se os transientes existem e
- * caso não existam, cria-os
- *
- * @return void
- */
-function abctalks_set_youtube_videos_transients()
-{
-    if (false === ($live_next_video = get_transient('live_next_video'))) {
-        $live_next_video = abctalks_get_live_next_video();
-        set_transient('live_next_video', $live_next_video, HOUR_IN_SECONDS);
-    }
-    if (false === ($live_next_video_full_description = get_transient('live_next_video_full_description'))) {
-        $live_next_video_full_description = abctalks_get_live_next_video_full_description();
-        set_transient('live_next_video_full_description', $live_next_video_full_description, HOUR_IN_SECONDS);
-    }
-    if (false === ($main_playlist_videos = get_transient('main_playlist_videos'))) {
-        $main_playlist_videos = abctalks_get_playlist_videos(null);
-        set_transient('main_playlist_videos', $main_playlist_videos, HOUR_IN_SECONDS);
-    }
-    if (false === ($cuts_playlist_videos = get_transient('cuts_playlist_videos'))) {
-        $playlist_id = abctalks_get_option('cuts_playlist_id');
-        $cuts_playlist_videos = abctalks_get_playlist_videos($playlist_id);
-        set_transient('cuts_playlist_videos', $cuts_playlist_videos, HOUR_IN_SECONDS);
-    }
-}
-
-add_action('init', 'abctalks_set_youtube_videos_transients');
-
-
-/**
  * abctalks_delete_transients
  *
  * Apaga os transientes
@@ -173,9 +156,22 @@ function abctalks_delete_transients()
 add_action('wp_ajax_abctalks_delete_transients', 'abctalks_delete_transients');
 // add_action('wp_ajax_nopriv_abctalks_delete_transients', 'abctalks_delete_transients');
 
+/**
+ * abctalks_next_upcoming_video_output
+ * 
+ * Retorna o html do vídeo da próxima live
+ *
+ * @param  boolean $return_video
+ * @return string
+ */
 function abctalks_next_upcoming_video_output($return_video = true)
 {
     $live_next_video = get_transient('live_next_video');
+    if (!$live_next_video) {
+        // abctalk_debug('Transiente \'live_next_video\' não encontrado');
+        $live_next_video = abctalks_get_live_next_video();
+        set_transient('live_next_video', $live_next_video, HOUR_IN_SECONDS);
+    }
     $output = '';
     if ($return_video) {
         $output = '<div class="abctalks-playlist">';
@@ -208,51 +204,58 @@ function abctalks_playlist_output($atts)
         'layout' => ''
     ), $atts);
 
-    $main_playlist_id = abctalks_get_option('main_playlist_id');
+    // $main_playlist_id = abctalks_get_option('main_playlist_id');
     $cuts_playlist_id = abctalks_get_option('cuts_playlist_id');
-    $main_playlist_videos = null;
+    $playlist_videos = null;
     switch ($atts['playlist_id']) {
-        case null:
-        case '':
-        case $main_playlist_id:
-            $main_playlist_videos = get_transient('main_playlist_videos');
-            break;
-
         case $cuts_playlist_id:
-            $main_playlist_videos = get_transient('cuts_playlist_videos');
+            $playlist_videos = get_transient('cuts_playlist_videos');
+            if (!$playlist_videos) {
+                // abctalk_debug('Transiente \'cuts_playlist_videos\' não encontrado.');
+                $playlist_id = abctalks_get_option('cuts_playlist_id');
+                $playlist_videos = abctalks_get_playlist_videos($playlist_id);
+                set_transient('cuts_playlist_videos', $playlist_videos, HOUR_IN_SECONDS);
+            }
             break;
 
         default:
-            $main_playlist_videos = abctalks_get_playlist_videos($atts['playlist_id']);
+
+            $playlist_videos = get_transient('main_playlist_videos');
+            if (!$playlist_videos) {
+                // abctalk_debug('Transiente \'main_playlist_videos\' não encontrado.');
+                $playlist_videos = abctalks_get_playlist_videos(null);
+                set_transient('main_playlist_videos', $playlist_videos, HOUR_IN_SECONDS);
+            }
             break;
     }
 
-    if (!$main_playlist_videos)
+    if (!$playlist_videos)
         return __('Não foi possível encontrar a playlist.', 'abctalks');
 
-    if (is_string($main_playlist_videos))
-        return $main_playlist_videos;
 
-    $playlist_videos = [];
+    if (is_string($playlist_videos))
+        return $playlist_videos;
+
+    $filtered_playlist_videos = [];
     $count = 0;
-    foreach ($main_playlist_videos as $all_playlist_video) {
+    foreach ($playlist_videos as $video) {
         if ($count < $atts['max_results'])
-            $playlist_videos[] = $all_playlist_video;
+            $filtered_playlist_videos[] = $video;
         $count++;
     }
 
     $extra_css_class = $atts['layout'] ? ' ' . $atts['layout'] : '';
 
     $output = '<div class="abctalks-playlist' . $extra_css_class . '">';
-    if (is_iterable($playlist_videos)) {
-        foreach ($playlist_videos as $playlist_video) {
+    if (is_iterable($filtered_playlist_videos)) {
+        foreach ($filtered_playlist_videos as $video) {
             $output .= '<div class="abctalks-playlist-item abctalks-embed-container">';
-            $output .= '<iframe src="https://www.youtube.com/embed/' . $playlist_video['video_id'] . '" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+            $output .= '<iframe src="https://www.youtube.com/embed/' . $video['video_id'] . '" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
             $output .= '</div>';
         }
     } else {
         $output .= '<div class="abctalks-playlist-item abctalks-embed-container">';
-        $output .= '<iframe src="https://www.youtube.com/embed/' . $playlist_videos['video_id'] . '" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+        $output .= '<iframe src="https://www.youtube.com/embed/' . $filtered_playlist_videos['video_id'] . '" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
         $output .= '</div>';
     }
     $output .= '</div>';
