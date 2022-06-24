@@ -23,7 +23,7 @@ function abctalks_get_live_next_video()
     $youtube_channel_response = wp_remote_get($youtube_channel_url);
     $youtube_channel_array = json_decode($youtube_channel_response['body']);
     $youtube_videos_data = $youtube_channel_array->items;
-    $youtube_next_video_data = $youtube_channel_array->items[count($youtube_videos_data) - 1];
+    $youtube_next_video_data = $youtube_channel_array->items[0];
     $youtube_next_video = array(
         'title'                 => $youtube_next_video_data->snippet->title,
         'video_id'              => $youtube_next_video_data->id->videoId,
