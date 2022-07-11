@@ -23,15 +23,54 @@ function abctalks_get_live_next_video()
     $youtube_channel_response = wp_remote_get($youtube_channel_url);
     $youtube_channel_array = json_decode($youtube_channel_response['body']);
     $youtube_videos_data = $youtube_channel_array->items;
-    $youtube_next_video_data = $youtube_channel_array->items[0];
-    $youtube_next_video = array(
-        'title'                 => $youtube_next_video_data->snippet->title,
-        'video_id'              => $youtube_next_video_data->id->videoId,
-        'video_description'     => $youtube_next_video_data->snippet->description,
-        'thumbnail'             => $youtube_next_video_data->snippet->thumbnails->high->url,
-        'url'                   => 'https://www.youtube.com/watch?v=' . $youtube_next_video_data->id->videoId
-    );
-    return $youtube_next_video;
+    $youtube_upcoming_videos_id = [];
+    $youtube_upcoming_videos_data = [];
+    foreach ($youtube_videos_data as $youtube_video_data) {
+        $youtube_upcoming_videos_id[] = $youtube_video_data->id->videoId;
+        $youtube_upcoming_videos_data[$youtube_video_data->id->videoId] = array(
+            'title'                 => $youtube_video_data->snippet->title,
+            'video_id'              => $youtube_video_data->id->videoId,
+            'video_description'     => $youtube_video_data->snippet->description,
+            'thumbnail'             => $youtube_video_data->snippet->thumbnails->high->url,
+            'url'                   => 'https://www.youtube.com/watch?v=' . $youtube_video_data->id->videoId
+        );
+    }
+    $schedules = abctalks_get_videos_scheduledStartTime($youtube_upcoming_videos_id);
+
+    if (!is_array($schedules))
+        return __('Não foi possível encontrar a data de agendamento da próxima live.', 'abctalks');
+
+    asort($schedules);
+    $youtube_next_video_id = key($schedules);
+    return $youtube_upcoming_videos_data[$youtube_next_video_id];
+}
+
+/**
+ * abctalks_get_videos_scheduledStartTime
+ * 
+ * Pega a data de agendamento da próxima live
+ *
+ * @param  array $ids
+ * @return array
+ */
+function abctalks_get_videos_scheduledStartTime($ids)
+{
+    $api_key = abctalks_get_option('youtube_api_key');
+
+    if (!$api_key)
+        return;
+
+    // Pega as informações dos vídeos pelo ID
+    $youtube_channel_url = 'https://www.googleapis.com/youtube/v3/videos?id=' . implode(',', $ids) . '&part=liveStreamingDetails&key=' . $api_key;
+    $youtube_channel_response = wp_remote_get($youtube_channel_url);
+    $youtube_channel_array = json_decode($youtube_channel_response['body']);
+    $youtube_videos_data = $youtube_channel_array->items;
+    $return_array = [];
+    foreach ($youtube_videos_data as $youtube_video_data) {
+        // Armazena a data em UNIX timestamp, usando o DI do vídeo como Key
+        $return_array[$youtube_video_data->id] = strtotime($youtube_video_data->liveStreamingDetails->scheduledStartTime);
+    }
+    return $return_array;
 }
 
 /**
