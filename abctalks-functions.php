@@ -25,6 +25,7 @@ function abctalks_get_live_next_video()
     $youtube_videos_data = $youtube_channel_array->items;
     $youtube_upcoming_videos_id = [];
     $youtube_upcoming_videos_data = [];
+    // abctalk_debug($youtube_video_data);
     foreach ($youtube_videos_data as $youtube_video_data) {
         $youtube_upcoming_videos_id[] = $youtube_video_data->id->videoId;
         $youtube_upcoming_videos_data[$youtube_video_data->id->videoId] = array(
@@ -110,6 +111,35 @@ function abctalks_get_live_next_video_full_description()
     return $youtube_next_video_array->snippet->description;
 }
 
+/**
+ * get_upcoming_live_videos
+ *
+ * Retorna o ID das próximas lives
+ * 
+ * @return array || string (error message)
+ */
+function get_upcoming_live_videos()
+{
+    $api_key = abctalks_get_option('youtube_api_key');
+
+    if (!$api_key)
+        return __('API Key não encontrada', 'abctalks');
+
+    $channel_id = abctalks_get_option('channel_id');
+
+    if (!$channel_id)
+        return __('API Key não encontrada', 'abctalks');
+
+    $youtube_channel_url = 'https://www.googleapis.com/youtube/v3/search?order=date&part=snippet&channelId=' . $channel_id . '&maxResults=50&type=video&eventType=upcoming&key=' . $api_key;
+    $youtube_channel_response = wp_remote_get($youtube_channel_url);
+    $youtube_channel_array = json_decode($youtube_channel_response['body']);
+    $youtube_videos_data = $youtube_channel_array->items;
+    $youtube_upcoming_videos_id = [];
+    foreach ($youtube_videos_data as $video) {
+        $youtube_upcoming_videos_id[] = $video->id->videoId;
+    }
+    return $youtube_upcoming_videos_id;
+}
 
 /**
  * abctalks_get_playlist_videos
@@ -138,13 +168,16 @@ function abctalks_get_playlist_videos($playlist_id)
     // Removido o parâmetro "max_results" para retornar todos os vídeos da playlist
     $url = 'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=' . $playlist_id . '&maxResults=50&key=' . $api_key;
 
+    // pega as próximas lives programadas
+    $upcoming_live_videos_id = get_upcoming_live_videos();
+
     $youtube_playlist_response = wp_remote_get($url);
     if (is_array($youtube_playlist_response)) {
         $youtube_playlist_response = json_decode($youtube_playlist_response['body']);
         if (isset($youtube_playlist_response->items)) {
             foreach ($youtube_playlist_response->items as $playlist_item) {
                 // Previne que vídeos privados sejam exibidos
-                if ($playlist_item->snippet->title !== 'Private video') {
+                if ($playlist_item->snippet->title !== 'Private video' && !in_array($playlist_item->snippet->resourceId->videoId, $upcoming_live_videos_id)) {
                     $playlist_videos[] = array(
                         'id'                    => $playlist_item->id,
                         'title'                 => $playlist_item->snippet->title,
